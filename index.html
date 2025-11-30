@@ -3,634 +3,555 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Vorie Online IDE — Minimal Modern</title>
-<link rel="icon" href="data:;base64,iVBORw0KGgo=">
+<title>Vorie Online IDE — Final</title>
 <style>
-  /* ========== THEME (Minimal Modern) ========== */
-  :root{
-    --bg:#0b1220; --card:#0f1724; --muted:#9fb0c8; --text:#e6eef8;
-    --accent:#60a5fa; --soft:#0b1a2a; --glass: rgba(255,255,255,0.02);
-    --radius:10px; --transition:280ms cubic-bezier(.2,.9,.25,1);
-  }
+  :root{--bg:#0b1220;--card:#0f1724;--muted:#9fb0c8;--text:#e6eef8;--accent:#60a5fa;--soft:#0b1a2a;--transition:280ms}
   *{box-sizing:border-box}
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#071227 0%, #04101a 100%);color:var(--text);-webkit-font-smoothing:antialiased}
+  body{margin:0;font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,#071227,#04101a);color:var(--text);-webkit-font-smoothing:antialiased}
   header{height:56px;display:flex;align-items:center;gap:12px;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.03)}
-  header .brand{display:flex;align-items:center;gap:10px}
   .hamburger{width:44px;height:44px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all var(--transition)}
-  .hamburger:hover{transform:scale(1.03)}
-  .hamburger .bars{width:18px;height:2px;background:var(--text);position:relative;transition:all 200ms}
-  .hamburger .bars:before,.hamburger .bars:after{content:"";position:absolute;left:0;width:18px;height:2px;background:var(--text);transition:all 200ms}
+  .hamburger .bars{width:18px;height:2px;background:var(--text);position:relative}
+  .hamburger .bars:before,.hamburger .bars:after{content:"";position:absolute;left:0;width:18px;height:2px;background:var(--text)}
   .hamburger .bars:before{top:-6px} .hamburger .bars:after{top:6px}
-  .hamburger.open .bars{background:transparent}
-  .hamburger.open .bars:before{transform:rotate(45deg);top:0}
-  .hamburger.open .bars:after{transform:rotate(-45deg);top:0}
-
-  .header-title{font-weight:600;font-size:16px}
-  .header-sub{font-size:12px;color:var(--muted)}
-
-  /* layout */
   .app{display:flex;height:calc(100vh - 56px);overflow:hidden}
-  /* Sidebar */
-  .sidebar{
-    position:fixed;left:0;top:56px;bottom:0;width:320px;
-    background:var(--card);backdrop-filter: blur(6px);box-shadow: 8px 18px 40px rgba(2,6,23,0.6);
-    transform:translateX(-110%);transition:transform var(--transition);border-right:1px solid rgba(255,255,255,0.02);z-index:60;padding:12px;display:flex;flex-direction:column;gap:12px;
-    border-top-right-radius:12px;border-bottom-right-radius:12px;
-  }
+  .sidebar{position:fixed;left:0;top:56px;bottom:0;width:320px;background:var(--card);backdrop-filter:blur(6px);transform:translateX(-110%);transition:transform var(--transition);padding:12px;border-right:1px solid rgba(255,255,255,0.02);z-index:60;border-top-right-radius:12px;border-bottom-right-radius:12px}
   .sidebar.open{transform:translateX(0)}
-  .sidebar .section-title{font-size:13px;color:var(--muted);margin-bottom:6px}
-  .sidebar .menu{display:flex;flex-direction:column;gap:8px}
-  .menu button{display:flex;align-items:center;gap:8px;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--text);cursor:pointer;text-align:left;transition:all 180ms}
-  .menu button:hover{transform:translateX(6px);background:linear-gradient(90deg, rgba(96,165,250,0.06), transparent)}
-  .menu button.active{background:linear-gradient(90deg, rgba(96,165,250,0.08), transparent);box-shadow: inset 0 0 0 1px rgba(96,165,250,0.03)}
-  .sidebar .small{font-size:12px;color:var(--muted)}
-
-  /* content area */
+  .menu{display:flex;flex-direction:column;gap:8px}
+  .menu button{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--text);cursor:pointer;text-align:left}
+  .menu button.active{background:linear-gradient(90deg, rgba(96,165,250,0.08), transparent)}
   .content{flex:1;margin-left:0;display:flex;flex-direction:column;height:100%;transition:margin-left var(--transition)}
   .content.shift{margin-left:320px}
-  .main{display:flex;gap:12px;padding:12px;height:100%;box-sizing:border-box}
-  .editor{flex:1;display:flex;flex-direction:column;gap:10px}
-  .controls{display:flex;gap:8px;align-items:center}
-  select,input[type=text],button {padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:var(--text);font-family:inherit}
-  button{cursor:pointer}
-  textarea#code{flex:1;width:100%;min-height:260px;border-radius:10px;padding:12px;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, 'Courier New', monospace;font-size:13px;background:var(--soft);color:var(--text);border:1px solid rgba(255,255,255,0.03);resize:vertical;transition:box-shadow 180ms}
-  textarea#code:focus{box-shadow:0 6px 30px rgba(2,6,23,0.6)}
-  .panel{width:380px;max-width:40%;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01));padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);overflow:auto}
-  .card{background:transparent;padding:6px;border-radius:8px}
-  pre.output{background:#071224;padding:10px;border-radius:8px;color:#cfeffd;white-space:pre-wrap;word-break:break-word;min-height:120px}
+  .main{display:flex;flex-direction:column;gap:12px;padding:12px;height:100%;box-sizing:border-box}
+  textarea,select,input,button{font-family:inherit}
+  textarea#code{flex:1;width:100%;min-height:260px;border-radius:10px;padding:12px;font-family:ui-monospace, Menlo, Monaco, monospace;background:var(--soft);color:var(--text);border:1px solid rgba(255,255,255,0.03);resize:vertical}
+  .panel{max-width:100%;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.01));padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);overflow:auto}
+  pre.output{background:#071224;padding:10px;border-radius:8px;color:#cfeffd;min-height:120px;white-space:pre-wrap;word-break:break-word}
   iframe.preview{width:100%;height:320px;border-radius:8px;border:1px solid rgba(255,255,255,0.04)}
-
-  /* responsive / mobile first */
-  @media (max-width:880px){
-    .sidebar{width:84%;max-width:360px}
-    .content.shift{margin-left:0}
-    .panel{display:none}
-  }
-
-  /* small UI niceties */
-  .row{display:flex;gap:8px;align-items:center}
+  .files-list{max-height:360px;overflow:auto;border-radius:6px;padding:6px;background:rgba(255,255,255,0.02)}
+  .file-item{padding:8px;border-radius:8px;display:flex;justify-content:space-between;gap:8px;align-items:center;border:1px solid rgba(255,255,255,0.02);margin-bottom:8px}
   .small{font-size:12px;color:var(--muted)}
-  .muted{color:var(--muted)}
-  .kbd{background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:6px;font-family:monospace;font-size:12px}
-  .fade-in{animation:fadeIn 360ms ease both}
+  @media (max-width:880px){ .sidebar{width:84%} }
+  .fade-in{animation:fadeIn 260ms ease both}
   @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .badge{font-size:11px;padding:4px 6px;border-radius:6px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.03)}
+  .btn{padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--text);cursor:pointer}
 </style>
 </head>
 <body>
 <header>
-  <div class="brand">
-    <button id="hamburger" class="hamburger" aria-label="Toggle menu" title="Menu">
-      <span class="bars"></span>
-    </button>
-    <div>
-      <div class="header-title">Console Vorie - V1</div>
-      <div class="header-sub">Made With ❤️ By Xgtib</div>
-    </div>
+  <button id="hamburger" class="hamburger" aria-label="Toggle menu"><span class="bars"></span></button>
+  <div>
+    <div style="font-weight:600">VORIE Online IDE</div>
+    <div class="small">Multi-language • FileManager auto-save • Judge0 + JsonBin</div>
   </div>
   <div style="flex:1"></div>
-  <div class="small kbd">Ctrl/Cmd + Enter → Run</div>
+  <div class="small" style="margin-right:10px">Ctrl/Cmd+Enter → Run</div>
 </header>
 
 <div class="app">
-  <!-- SIDEBAR -->
+  <!-- Sidebar -->
   <aside id="sidebar" class="sidebar" aria-hidden="true">
-    <div>
-      <div class="section-title">Fitur</div>
-      <div class="menu">
-        <button id="m-editor" class="active" data-section="editor">Editor</button>
-        <button id="m-files" data-section="files">File Manager</button>
-        <button id="m-calc" data-section="calc">Calculator</button>
-        <button id="m-chat" data-section="chat">ChatGPT</button>
-        <button id="m-vor" data-section="vor">Another By Me</button>
+    <div style="display:flex;flex-direction:column;height:100%">
+      <div style="margin-bottom:8px"><div class="small" style="margin-bottom:6px">Fitur</div>
+        <div class="menu">
+          <button data-section="editor" class="active">Editor</button>
+          <button data-section="files">File Manager</button>
+          <button data-section="calc">Calculator</button>
+          <button data-section="chat">ChatGPT</button>
+          <button data-section="settings">Settings</button>
+        </div>
       </div>
-      <div style="height:8px"></div>
-      <div class="small muted">Tip: Aktifkan Mode Dekstop</div>
-    </div>
 
-    <div style="margin-top:auto">
-      <div class="small muted" style="margin-bottom:6px">Theme</div>
-      <div class="row">
-        <button id="themeToggle" class="btn-ghost">Toggle Light</button>
-        <div style="flex:1"></div>
-        <div class="small muted">v1.0</div>
+      <div style="margin-top:auto">
+        <div class="small" style="margin-bottom:8px">Theme</div>
+        <div style="display:flex;gap:8px">
+          <button id="themeToggle" class="btn">Toggle Theme</button>
+          <div style="flex:1"></div>
+          <div class="small">v1.0</div>
+        </div>
       </div>
     </div>
   </aside>
 
-  <!-- CONTENT -->
-  <div id="content" class="content">
+  <!-- Content -->
+  <main id="content" class="content">
     <div class="main">
-      <section id="editorPanel" class="editor card fade-in">
-        <div class="controls row">
-          <label class="small">Bahasa</label>
-          <select id="lang" aria-label="Bahasa">
-            <option value="cpp">C++</option>
-            <option value="c">C</option>
-            <option value="python">Python</option>
-            <option value="java">Java</option>
-            <option value="js">JavaScript</option>
-            <option value="html">HTML / CSS / JS</option>
+
+      <!-- EDITOR VIEW -->
+      <section id="view-editor" class="panel fade-in">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+          <label class="small">Language</label>
+          <select id="lang">
+            <option value="cpp">C++</option><option value="c">C</option><option value="python">Python</option><option value="java">Java</option><option value="js">JavaScript</option><option value="html">HTML/CSS/JS</option>
           </select>
-
-          <button id="runBtn" title="Run (Ctrl/Cmd+Enter)">▶ Run</button>
-          <button id="stopBtn" class="btn-ghost" title="Stop (tidak selalu tersedia)">■ Stop</button>
-          <button id="downloadBtn" class="btn-ghost" title="Download kode">⬇️</button>
-
+          <button id="runBtn" class="btn">▶ Run</button>
+          <button id="stopBtn" class="btn">■ Stop</button>
+          <button id="downloadBtn" class="btn">⬇ Download</button>
           <div style="flex:1"></div>
           <label class="small">Preview</label>
-          <select id="previewMode" aria-label="Preview mode">
-            <option value="auto">Auto</option>
-            <option value="console">Console</option>
-            <option value="html">HTML Preview</option>
-          </select>
+          <select id="previewMode"><option value="auto">Auto</option><option value="console">Console</option><option value="html">HTML</option></select>
         </div>
 
-        <textarea id="code" spellcheck="false">// Selamat datang di VORIE Online IDE (Minimal Modern)
-// Pilih bahasa lalu tekan Run.
-// Ctrl/Cmd + Enter untuk menjalankan.
+        <textarea id="code">// VORIE IDE: Pilih bahasa lalu Run. Ctrl/Cmd+Enter untuk menjalankan.
 #include &lt;iostream&gt;
 using namespace std;
-int main(){ cout<<\"Hello from VORIE!\\n\"; return 0; }</textarea>
+int main(){ cout<<\"Hello Vorie!\\n\"; return 0; }</textarea>
 
-        <div class="card">
+        <div style="margin-top:12px">
           <div class="small" style="margin-bottom:6px">Output</div>
           <pre id="output" class="output">— output akan muncul di sini —</pre>
         </div>
 
-        <div id="htmlPreviewContainer" class="card" style="display:none">
-          <div class="small" style="margin-bottom:6px">HTML Preview</div>
+        <div id="htmlPreview" style="display:none;margin-top:12px">
+          <div class="small">HTML Preview</div>
           <iframe id="preview" class="preview"></iframe>
         </div>
       </section>
 
-      <aside id="rightPanel" class="panel card fade-in">
-        <!-- This panel hides on small screens; sidebar handles features -->
-        <div id="panelContent">
-          <div id="panel-editor" class="panel-section">
-            <div class="section-title">Quick Actions</div>
-            <div class="row" style="margin-top:8px">
-              <input id="fileInput" type="file" />
-              <button id="uploadBtn">Upload</button>
-            </div>
-            <div style="height:10px"></div>
-            <div class="row">
-              <input id="saveAs" type="text" placeholder="Nama file ex: hello.cpp" style="flex:1" />
-              <button id="saveBtn">Save</button>
-            </div>
-            <div style="height:12px"></div>
-            <div class="small muted">Upload ke kami</div>
+      <!-- FILES VIEW -->
+      <section id="view-files" class="panel" style="display:none">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <div style="flex:1">
+            <div class="small" style="margin-bottom:6px">File Manager</div>
+            <input id="search" placeholder="Cari lokal / remote..." style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--text)"/>
           </div>
-
-          <div id="panel-files" class="panel-section" style="display:none">
-            <div class="section-title">File Manager</div>
-            <input id="search" type="text" placeholder="Cari file..." style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--text)"/>
-            <div id="filesList" class="files-list" style="margin-top:8px;max-height:220px;overflow:auto;padding:6px;background:var(--glass);border-radius:8px"></div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div class="small">Remote</div>
+            <div class="small badge" id="remoteStatus">—</div>
           </div>
-
-          <div id="panel-calc" class="panel-section" style="display:none">
-            <div class="section-title">Calculator</div>
-            <input id="calcInput" placeholder="Ketik ekspresi: 2*(3+4)" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--text)"/>
-            <div class="ops" id="ops" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px"></div>
-            <div style="margin-top:8px;display:flex;gap:8px">
-              <button id="calcEval">= Evaluate</button>
-              <button id="calcClear">C</button>
-            </div>
-            <pre id="calcResult" style="margin-top:8px;background:var(--soft);padding:8px;border-radius:8px;color:var(--text)">—</pre>
-          </div>
-
-          <div id="panel-chat" class="panel-section" style="display:none">
-            <div class="section-title">ChatGPT</div>
-            <textarea id="chatMsg" rows="4" placeholder="Tulis prompt..." style="width:100%;padding:8px;border-radius:8px;background:transparent;color:var(--text)"></textarea>
-            <div style="display:flex;gap:8px;margin-top:8px">
-              <button id="chatSend">Kirim</button>
-              <button id="chatClear">Clear</button>
-            </div>
-            <pre id="chatResp" style="margin-top:8px;background:var(--soft);padding:8px;border-radius:8px;color:var(--text)">—</pre>
-          </div>
-
-          <div id="panel-vor" class="panel-section" style="display:none">
-            <div class="section-title">Default</div>
-            <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-top:8px">
-              <h1>Another Project By Xgtib</h1>
-              <a href="tokovorie.xgtib.my.id">Toko Vorie</a>
-              <a href="gxostore.netlify.app">GxoStore</a>
-              <a href="vorcv.xgtib.my.id">VorCv For Vcf</a>
-              <a href="gxotopup.xgtib.my.id">Top Up ML</a>
-              <a href="api.xgtib.my.id">API's Xgtib</a>
-            </div>
-            <div class="small muted" style="margin-top:8px">Gunakan Dengan Bijak.</div>
-          </div>
-
         </div>
-      </aside>
+
+        <!-- Quick Actions (only in File Manager) -->
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+          <input id="fileInput" type="file" />
+          <button id="uploadBtn" class="btn">Upload</button>
+          <input id="saveAs" placeholder="Nama file ex: hello.cpp" style="padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--text);flex:1"/>
+          <button id="saveBtn" class="btn">Save</button>
+          <button id="exportBtn" class="btn">Export</button>
+          <input id="importFile" type="file" style="display:none"/>
+          <button id="importBtn" class="btn">Import</button>
+        </div>
+
+        <div style="display:flex;gap:12px">
+          <div style="flex:1">
+            <div class="files-list" id="filesList"></div>
+          </div>
+          <div style="width:300px">
+            <div class="small" style="margin-bottom:6px">Selected File Preview</div>
+            <pre id="filePreview" style="background:var(--soft);padding:10px;border-radius:8px;min-height:200px">—</pre>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <button id="importToLocal" class="btn">Import Remote → Local</button>
+              <button id="downloadSelected" class="btn">Download Selected</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CALC VIEW -->
+      <section id="view-calc" class="panel" style="display:none">
+        <div class="small" style="margin-bottom:8px">Calculator (math.js)</div>
+        <input id="calcInput" placeholder="Contoh: 2*(3+4) - sqrt(16)" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--text)"/>
+        <div id="ops" style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px"></div>
+        <div style="margin-top:8px;display:flex;gap:8px"><button id="calcEval" class="btn">= Evaluate</button><button id="calcClear" class="btn">C</button></div>
+        <pre id="calcResult" style="margin-top:8px;background:var(--soft);padding:8px;border-radius:8px">—</pre>
+      </section>
+
+      <!-- CHAT VIEW -->
+      <section id="view-chat" class="panel" style="display:none">
+        <div class="small" style="margin-bottom:8px">ChatGPT</div>
+        <textarea id="chatMsg" rows="4" placeholder="Tanya ChatGPT..." style="width:100%;padding:8px;border-radius:8px;background:transparent;color:var(--text)"></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button id="chatSend" class="btn">Kirim</button>
+          <button id="chatClear" class="btn">Clear</button>
+        </div>
+        <pre id="chatResp" style="margin-top:8px;background:var(--soft);padding:8px;border-radius:8px">—</pre>
+      </section>
+
+      <!-- SETTINGS VIEW -->
+      <section id="view-settings" class="panel" style="display:none">
+        <div class="small" style="margin-bottom:8px">Settings — isi untuk auto-save & remote</div>
+        <div style="display:grid;grid-template-columns:1fr;gap:8px">
+          <input id="jsonbinKey" placeholder="JSONBIN Master Key (X-Master-Key)" />
+          <input id="jsonbinBinId" placeholder="JSONBIN BIN ID (index bin)" />
+          <input id="judge0Host" placeholder="Judge0 host (eg: https://judge0.example.com)" />
+          <input id="judge0Key" placeholder="Judge0 API key (RapidAPI key / optional)" />
+          <input id="openaiKey" placeholder="OpenAI API key (opsional)" />
+          <div class="small">Catatan: Keys disimpan lokal di browser. Jangan pakai key sensitif di perangkat umum.</div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button id="btnLoadRemote" class="btn">Load remote index now</button>
+          <button id="btnClearLocal" class="btn">Clear local index</button>
+        </div>
+      </section>
+
     </div>
-  </div>
+  </main>
 </div>
 
 <footer style="position:fixed;left:0;right:0;bottom:0;padding:8px 12px;background:linear-gradient(180deg,transparent,rgba(0,0,0,0.18));font-size:12px;color:var(--muted)">
-  Made With ❤️ By Xgtib
+  VORIE Online IDE — Final • Single-file
 </footer>
 
 <script>
-/* ================================
-   VORIE Online IDE - Main Script
-   ================================ */
+/* =========================
+   VORIE Online IDE - FINAL
+   Features:
+   - Single-file SPA (Mode B)
+   - File Manager auto-save local -> jsonbin -> judge0 (optional)
+   - Remote JSONBin search + import
+   - Quick Actions only in File Manager
+   ========================= */
 
 /* Utilities */
-const $ = sel => document.querySelector(sel);
-const $$ = sel => Array.from(document.querySelectorAll(sel));
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
 const randId = () => 'id-' + Math.random().toString(36).slice(2,9);
-function esc(s){ return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'" :'&#39;'})[c]); }
-function toast(msg){ $('#output').textContent = (new Date()).toISOString() + ' › ' + msg + '\\n' + $('#output').textContent; }
+function esc(s){ return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+function toast(m){ const o=$('#output'); o.textContent = (new Date()).toISOString() + ' › ' + m + '\\n' + o.textContent; }
 
-/* Elements */
+/* Elements & state */
 const hamburger = $('#hamburger'), sidebar = $('#sidebar'), content = $('#content');
 const menuButtons = $$('.menu button');
+const views = {
+  editor: $('#view-editor'), files: $('#view-files'), calc: $('#view-calc'), chat: $('#view-chat'), settings: $('#view-settings')
+};
 const langEl = $('#lang'), runBtn = $('#runBtn'), stopBtn = $('#stopBtn'), codeEl = $('#code');
-const outputEl = $('#output'), htmlPreviewContainer = $('#htmlPreviewContainer'), previewFrame = $('#preview');
-const filesListEl = $('#filesList'), fileInput = $('#fileInput'), uploadBtn = $('#uploadBtn');
-const saveAsEl = $('#saveAs'), saveBtn = $('#saveBtn'), searchEl = $('#search');
+const outputEl = $('#output'), previewFrame = $('#preview'), htmlPreview = $('#htmlPreview'), previewMode = $('#previewMode');
+const fileInput = $('#fileInput'), uploadBtn = $('#uploadBtn'), saveAsEl = $('#saveAs'), saveBtn = $('#saveBtn');
+const filesListEl = $('#filesList'), filePreview = $('#filePreview'), searchEl = $('#search');
+const exportBtn = $('#exportBtn'), importBtn = $('#importBtn'), importFile = $('#importFile'), downloadSelected = $('#downloadSelected'), importToLocalBtn = $('#importToLocal'), remoteStatus = $('#remoteStatus');
 const calcInput = $('#calcInput'), opsDiv = $('#ops'), calcEval = $('#calcEval'), calcClear = $('#calcClear'), calcResult = $('#calcResult');
-const chatMsg = $('#chatMsg'), chatSend = $('#chatSend'), chatResp = $('#chatResp'), chatClear = $('#chatClear');
-const jsonbinKeyEl = $('#jsonbinKey'), jsonbinBinEl = $('#jsonbinBinId'), openaiKeyEl = $('#openaiKey'), judge0HostEl = $('#judge0Host');
-const previewMode = $('#previewMode');
+const chatMsg = $('#chatMsg'), chatSend = $('#chatSend'), chatClear = $('#chatClear'), chatResp = $('#chatResp');
+const jsonbinKeyEl = $('#jsonbinKey'), jsonbinBinEl = $('#jsonbinBinId'), judge0HostInput = $('#judge0Host'), judge0KeyInput = $('#judge0Key'), openaiKeyInput = $('#openaiKey');
+const btnLoadRemote = $('#btnLoadRemote'), btnClearLocal = $('#btnClearLocal');
 
-/* State */
 let sidebarOpen = false;
-let localIndex = JSON.parse(localStorage.getItem('vorie_index_v1')||'[]');
-function persistIndex(){ localStorage.setItem('vorie_index_v1', JSON.stringify(localIndex)); renderFiles(searchEl.value); }
+let localIndex = JSON.parse(localStorage.getItem('vorie_index_v1')||'[]'); // {id,fileName,fileType,savedAt,code,jsonbinId,judge0Id}
+let selectedFileId = null;
+let remoteCache = []; // holds remote JSONBin items when loaded
 
 /* Sidebar toggle */
 function setSidebar(open){
   sidebarOpen = !!open;
-  if(sidebarOpen){ sidebar.classList.add('open'); hamburger.classList.add('open'); content.classList.add('shift'); sidebar.setAttribute('aria-hidden','false'); }
-  else { sidebar.classList.remove('open'); hamburger.classList.remove('open'); content.classList.remove('shift'); sidebar.setAttribute('aria-hidden','true'); }
+  if(sidebarOpen){ sidebar.classList.add('open'); content.classList.add('shift'); sidebar.setAttribute('aria-hidden','false'); }
+  else { sidebar.classList.remove('open'); content.classList.remove('shift'); sidebar.setAttribute('aria-hidden','true'); }
 }
 hamburger.addEventListener('click', ()=> setSidebar(!sidebarOpen));
-document.addEventListener('click', (e)=>{
-  if(window.innerWidth <= 880 && sidebarOpen){
-    // close if click outside sidebar & hamburger
-    if(!e.composedPath().includes(sidebar) && !e.composedPath().includes(hamburger)) setSidebar(false);
+document.addEventListener('click', (e)=>{ if(window.innerWidth <= 880 && sidebarOpen){ if(!e.composedPath().includes(sidebar) && !e.composedPath().includes(hamburger)) setSidebar(false); } });
+
+/* View switching (Mode B: header fixed, content replaced) */
+function showView(name){
+  Object.keys(views).forEach(k => views[k].style.display = 'none');
+  if(views[name]) views[name].style.display = 'block';
+  menuButtons.forEach(b => b.classList.toggle('active', b.dataset.section === name));
+  // auto-close on mobile
+  if(window.innerWidth <= 880) setSidebar(false);
+  // focus certain controls
+  if(name === 'editor') codeEl.focus();
+  if(name === 'files') searchEl.focus();
+}
+menuButtons.forEach(b => b.addEventListener('click', ()=> showView(b.dataset.section)));
+showView('editor'); // default
+
+/* Persist index */
+function persistIndex(){ localStorage.setItem('vorie_index_v1', JSON.stringify(localIndex)); renderFiles(searchEl.value); }
+
+/* Render files list (local + remote indicator) */
+function renderFiles(q=''){
+  const query = (q||'').toLowerCase();
+  filesListEl.innerHTML = '';
+  const items = localIndex.filter(it => !query || (it.fileName && it.fileName.toLowerCase().includes(query)) || (it.fileType && it.fileType.toLowerCase().includes(query)));
+  if(items.length === 0){
+    filesListEl.innerHTML = '<div class="small">Tidak ada file lokal yang cocok.</div>';
+  } else {
+    items.forEach(it => {
+      const div = document.createElement('div'); div.className = 'file-item';
+      div.innerHTML = `<div style="flex:1"><div style="font-weight:600">${esc(it.fileName)}.${esc(it.fileType)}</div><div class="small">${it.savedAt}${it.jsonbinId?(' • jsonbin'):"" }${it.judge0Id?(' • judge0'):""}</div></div>
+        <div style="display:flex;gap:6px">
+          <button class="btn-load btn" data-id="${it.id}">Load</button>
+          <button class="btn-dl btn" data-id="${it.id}">DL</button>
+          <button class="btn-del btn" data-id="${it.id}">Del</button>
+        </div>`;
+      filesListEl.appendChild(div);
+    });
+    // handlers
+    $$('.btn-load').forEach(b => b.onclick = () => { const it = localIndex.find(x=>x.id===b.dataset.id); if(!it) return; selectedFileId = it.id; filePreview.textContent = it.code; codeEl.value = it.code; toast('Loaded ' + it.fileName + '.' + it.fileType); showView('files'); });
+    $$('.btn-dl').forEach(b => b.onclick = () => { const it = localIndex.find(x=>x.id===b.dataset.id); if(!it) return; downloadText(it.code, `${it.fileName}.${it.fileType}`); });
+    $$('.btn-del').forEach(b => b.onclick = () => { if(!confirm('Hapus dari index lokal?')) return; localIndex = localIndex.filter(x=>x.id!==b.dataset.id); persistIndex(); });
+  }
+
+  // render remote search results below local (if any)
+  if(remoteCache && remoteCache.length){
+    const header = document.createElement('div'); header.className='small'; header.style.marginTop='12px'; header.textContent = 'Remote (jsonbin)';
+    filesListEl.appendChild(header);
+    remoteCache.filter(r => !query || (r.fileName && r.fileName.toLowerCase().includes(query)) || (r.fileType && r.fileType.toLowerCase().includes(query))).forEach((r, idx) => {
+      const div = document.createElement('div'); div.className='file-item';
+      div.innerHTML = `<div style="flex:1"><div style="font-weight:600">${esc(r.fileName)}.${esc(r.fileType)}</div><div class="small">${r.savedAt}</div></div>
+        <div style="display:flex;gap:6px">
+          <button class="btn-import btn" data-idx="${idx}">Import</button>
+          <button class="btn-preview btn" data-idx="${idx}">Preview</button>
+        </div>`;
+      filesListEl.appendChild(div);
+    });
+    $$('.btn-import').forEach(b => b.onclick = async () => {
+      const idx = Number(b.dataset.idx); const r = remoteCache[idx];
+      if(!r) return alert('Remote item not found');
+      // import into local
+      const item = { id: randId(), fileName: r.fileName||('file-'+Date.now()), fileType: r.fileType||'txt', savedAt: r.savedAt||new Date().toISOString(), code: r.code||'', jsonbinId: jsonbinBinEl.value.trim()||JSONBIN_BIN_ID||null, judge0Id: null };
+      localIndex.unshift(item); persistIndex(); toast('Imported remote to local: '+item.fileName+'.'+item.fileType);
+    });
+    $$('.btn-preview').forEach(b => b.onclick = () => { const r = remoteCache[Number(b.dataset.idx)]; if(!r) return; filePreview.textContent = r.code||'(no code)'; selectedFileId = null; });
+  }
+}
+
+/* Helpers */
+function downloadText(text, filename){ const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text], {type:'text/plain'})); a.download=filename; document.body.appendChild(a); a.click(); a.remove(); }
+
+/* Search local + remote on input (remote only if configured) */
+searchEl.addEventListener('input', async () => {
+  const q = searchEl.value.trim();
+  // if remote configured, fetch remote records and cache
+  const mk = jsonbinKeyEl.value.trim() || JSONBIN_MASTER_KEY || '';
+  const bin = jsonbinBinEl.value.trim() || JSONBIN_BIN_ID || '';
+  if(mk && bin){
+    remoteStatus.textContent = 'Fetching...';
+    try{
+      const j = await jsonbinGet(bin, mk);
+      const arr = j.record && Array.isArray(j.record) ? j.record : [];
+      // normalize remoteCache
+      remoteCache = arr.map(r => ({ code: r.code||'', fileType: r.fileType||'txt', fileName: r.fileName||'untitled', savedAt: r.savedAt||'' }));
+      remoteStatus.textContent = 'Remote loaded: ' + remoteCache.length;
+    }catch(err){ remoteCache = []; remoteStatus.textContent = 'Remote error'; }
+  } else {
+    remoteCache = [];
+    remoteStatus.textContent = 'No remote configured';
+  }
+  renderFiles(q);
+});
+
+/* Upload button — save local, auto remote (jsonbin), auto judge0 submission */
+uploadBtn.addEventListener('click', async () => {
+  const f = fileInput.files[0]; if(!f) return alert('Pilih file dulu.');
+  const code = await f.text(); const parts = f.name.split('.'); const ext = parts.length>1?parts.pop():'txt'; const nameOnly = parts.join('.')||'file';
+  const item = { id: randId(), fileName: nameOnly, fileType: ext, savedAt: new Date().toISOString(), code, jsonbinId:null, judge0Id:null };
+  localIndex.unshift(item); persistIndex(); toast('Saved locally: ' + nameOnly + '.' + ext);
+
+  // Auto save to jsonbin if configured
+  const mk = jsonbinKeyEl.value.trim() || JSONBIN_MASTER_KEY || '';
+  const bin = jsonbinBinEl.value.trim() || JSONBIN_BIN_ID || '';
+  if(mk && bin){
+    try{
+      // fetch existing array, append, put back
+      let existing = [];
+      try{ const res = await jsonbinGet(bin, mk); existing = res.record && Array.isArray(res.record) ? res.record : []; } catch(e){ existing = []; }
+      existing.push({ code: item.code, fileType: item.fileType, fileName: item.fileName, savedAt: item.savedAt });
+      await jsonbinPut(bin, mk, existing);
+      item.jsonbinId = bin; persistIndex();
+      toast('Auto-saved to JsonBin (bin='+bin+')');
+    }catch(err){ toast('JsonBin save failed: ' + err.message); }
+  }
+
+  // Auto submit to Judge0 (optional) — create submission and store token/id
+  const judgeHost = judge0HostInput.value.trim() || JUDGE0_HOST || '';
+  const judgeKey = judge0KeyInput.value.trim() || JUDGE0_KEY || '';
+  if(judgeHost){
+    try{
+      // base64 encode source
+      const b64 = btoa(unescape(encodeURIComponent(item.code)));
+      // default language: map by extension (quick)
+      const langIdMap = { c:50, cpp:54, java:62, python:71, js:63 }; // common Judge0 ids (may differ per instance)
+      const language_id = langIdMap[item.fileType] || 54;
+      const url = judgeHost.replace(/\/$/, '') + '/submissions?base64_encoded=true';
+      const headers = { 'Content-Type':'application/json' };
+      if(judgeKey) headers['X-RapidAPI-Key'] = judgeKey;
+      const body = JSON.stringify({ language_id, source_code: b64 });
+      // create submission (without wait to get token)
+      const res = await fetch(url, { method:'POST', headers, body });
+      const j = await res.json();
+      // judge0 returns token or id; store it
+      const token = j.token || j.id || (j && j.data && j.data.id) || null;
+      if(token){ item.judge0Id = token; persistIndex(); toast('Submitted to Judge0 (token saved)'); }
+    }catch(err){ console.warn('judge0 submit failed', err); toast('Judge0 submit failed: ' + err.message); }
   }
 });
 
-/* Menu nav */
-  /* ================================
-   Single View Mode - Mode B
-   ================================ */
-
-const sections = {
-  editor: "#editorPanel",
-  files: "#panel-files",
-  calc: "#panel-calc",
-  chat: "#panel-chat",
-  vor: "#panel-vor"
-};
-
-function showSection(id) {
-  // Hide all first
-  Object.values(sections).forEach(sel => {
-    document.querySelector(sel).style.display = "none";
-  });
-
-  // Show target
-  document.querySelector(sections[id]).style.display = "block";
-  document.querySelector(sections[id]).classList.add("fade-in");
-
-  // Set active button
-  menuButtons.forEach(b => b.classList.remove("active"));
-  document.querySelector(`[data-section="${id}"]`).classList.add("active");
-
-  // Auto close sidebar on mobile
-  if (window.innerWidth <= 880) setSidebar(false);
-}
-
-// Replace menu click logic
-menuButtons.forEach(btn => btn.addEventListener("click", () => {
-  const section = btn.dataset.section;
-  showSection(section);
-}));
-
-// Initial view: Editor only
-showSection("editor");
-
-
-/* Render files list */
-function renderFiles(filter=''){
-  const q = (filter||'').toLowerCase();
-  if(!localIndex.length){ filesListEl.innerHTML = '<div class="small muted">Belum ada file — simpan dulu.</div>'; return; }
-  const shown = localIndex.filter(it => !q || (it.fileName && it.fileName.toLowerCase().includes(q)) || (it.fileType && it.fileType.toLowerCase().includes(q)));
-  filesListEl.innerHTML = shown.map(it => `
-    <div class="file-item" style="display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px;border-radius:8px">
-      <div style="flex:1">
-        <div style="font-weight:600">${esc(it.fileName)}.${esc(it.fileType)}</div>
-        <div class="small muted">${it.savedAt}${it.jsonbinId?(' • jsonbin:'+it.jsonbinId):''}</div>
-      </div>
-      <div style="display:flex;gap:6px;align-items:center">
-        <button data-id="${it.id}" class="btn-load">Load</button>
-        <button data-id="${it.id}" class="btn-dl">DL</button>
-        <button data-id="${it.id}" class="btn-del">Del</button>
-      </div>
-    </div>`).join('');
-  $$('.btn-load').forEach(b=>b.onclick = () => {
-    const it = localIndex.find(x=>x.id===b.dataset.id); if(!it) return;
-    codeEl.value = it.code; langEl.value = mapExtToLang(it.fileType); toast('Loaded '+it.fileName+'.'+it.fileType);
-  });
-  $$('.btn-dl').forEach(b=>b.onclick = () => {
-    const it = localIndex.find(x=>x.id===b.dataset.id); if(!it) return;
-    downloadText(it.code, `${it.fileName}.${it.fileType}`);
-  });
-  $$('.btn-del').forEach(b=>b.onclick = () => {
-    if(!confirm('Hapus dari index lokal?')) return;
-    localIndex = localIndex.filter(x=>x.id!==b.dataset.id); persistIndex();
-  });
-}
-renderFiles();
-
-/* Map ext to lang */
-function mapExtToLang(ext){
-  ext = (ext||'').toLowerCase();
-  if(ext==='c') return 'c';
-  if(ext==='cpp'||ext==='cc'||ext==='cxx') return 'cpp';
-  if(ext==='py') return 'python';
-  if(ext==='js') return 'js';
-  if(ext==='java') return 'java';
-  return 'cpp';
-}
-
-/* Download helper */
-function downloadText(text, filename){
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([text], { type:'text/plain' }));
-  a.download = filename; document.body.appendChild(a); a.click(); a.remove();
-}
-
-/* Upload input handling */
-uploadBtn.addEventListener('click', async () => {
-  const f = fileInput.files[0];
-  if(!f) return alert('Pilih file dulu.');
-  const txt = await f.text();
-  const parts = f.name.split('.'); const ext = parts.length>1 ? parts.pop() : 'txt'; const nameOnly = parts.join('.') || 'file';
-  const item = { id: 'loc-'+Date.now()+'-'+Math.floor(Math.random()*9999), fileName: nameOnly, fileType: ext, savedAt: new Date().toISOString(), code: txt, jsonbinId: null };
-  localIndex.unshift(item); if(localIndex.length>300) localIndex.pop(); persistIndex();
-  toast('Tersimpan di index lokal.');
-});
-
-/* Save as / Save to jsonbin */
+/* Save button (manual save + remote + judge0) */
 saveBtn.addEventListener('click', async () => {
   const nameRaw = saveAsEl.value.trim(); if(!nameRaw) return alert('Isi nama file ex: hello.cpp');
   const parts = nameRaw.split('.'); if(parts.length<2) return alert('Nama harus mengandung ekstensi');
   const ext = parts.pop(); const nameOnly = parts.join('.');
   const code = codeEl.value;
-  const item = { id:'loc-'+Date.now()+'-'+Math.floor(Math.random()*9999), fileName:nameOnly, fileType:ext, savedAt:new Date().toISOString(), code, jsonbinId:null };
-  localIndex.unshift(item); if(localIndex.length>300) localIndex.pop(); persistIndex();
-  const mk = jsonbinKeyEl.value.trim(), bin = jsonbinBinEl.value.trim();
+  const item = { id: randId(), fileName:nameOnly, fileType:ext, savedAt:new Date().toISOString(), code, jsonbinId:null, judge0Id:null };
+  localIndex.unshift(item); persistIndex(); toast('Simpan lokal: ' + nameOnly + '.' + ext);
+
+  // Auto jsonbin
+  const mk = jsonbinKeyEl.value.trim() || JSONBIN_MASTER_KEY || '';
+  const bin = jsonbinBinEl.value.trim() || JSONBIN_BIN_ID || '';
   if(mk && bin){
     try{
-      toast('Menyimpan ke jsonbin...');
-      let existing;
-      try{ const r = await jsonbinGet(bin, mk); existing = r && r.record ? r.record : []; } catch(e){ existing = []; }
-      existing.push({ code, fileType: ext, fileName: nameOnly, savedAt: item.savedAt });
+      let existing = [];
+      try{ const r = await jsonbinGet(bin, mk); existing = r.record && Array.isArray(r.record) ? r.record : []; } catch(e){ existing = []; }
+      existing.push({ code: item.code, fileType: item.fileType, fileName: item.fileName, savedAt: item.savedAt });
       await jsonbinPut(bin, mk, existing);
-      // mark
-      localIndex = localIndex.map(x => x.id === item.id ? ({...x, jsonbinId: bin}) : x);
-      persistIndex();
-      toast('Disimpan ke jsonbin bin='+bin);
-    }catch(err){ toast('jsonbin save failed: '+err.message); }
-  } else {
-    toast('Tersimpan lokal (isi JSONBIN key+bin di Settings untuk simpan online).');
+      item.jsonbinId = bin; persistIndex(); toast('Saved to JsonBin');
+    }catch(err){ toast('JsonBin save failed: ' + err.message); }
+  }
+
+  // Judge0 submit (optional)
+  const judgeHost = judge0HostInput.value.trim() || JUDGE0_HOST || '';
+  const judgeKey = judge0KeyInput.value.trim() || JUDGE0_KEY || '';
+  if(judgeHost){
+    try{
+      const b64 = btoa(unescape(encodeURIComponent(item.code)));
+      const langIdMap = { c:50, cpp:54, java:62, python:71, js:63 };
+      const language_id = langIdMap[item.fileType] || 54;
+      const url = judgeHost.replace(/\/$/, '') + '/submissions?base64_encoded=true';
+      const headers = { 'Content-Type':'application/json' };
+      if(judgeKey) headers['X-RapidAPI-Key'] = judgeKey;
+      const res = await fetch(url, { method:'POST', headers, body: JSON.stringify({ language_id, source_code: b64 }) });
+      const j = await res.json();
+      const token = j.token || j.id || null;
+      if(token){ item.judge0Id = token; persistIndex(); toast('Submitted to Judge0 (token saved)'); }
+    }catch(err){ toast('Judge0 submit failed: ' + err.message); }
   }
 });
 
-/* Search */
-searchEl.addEventListener('input', ()=> renderFiles(searchEl.value));
+/* Export / Import */
+exportBtn.addEventListener('click', ()=> {
+  const blob = new Blob([JSON.stringify(localIndex,null,2)], { type:'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'vorie-index.json'; a.click(); a.remove();
+});
+importBtn.addEventListener('click', ()=> importFile.click());
+importFile.addEventListener('change', ()=> {
+  const f = importFile.files[0]; if(!f) return;
+  const r = new FileReader(); r.onload = e => {
+    try{ const arr = JSON.parse(e.target.result); if(Array.isArray(arr)){ localIndex = arr.concat(localIndex); persistIndex(); alert('Import sukses'); } else alert('Format tidak valid'); } catch(err){ alert('Import error: '+err.message); }
+  }; r.readAsText(f);
+});
 
-/* JSONBIN helpers (v3) */
+/* Download selected / import remote to local */
+downloadSelected.addEventListener('click', ()=> {
+  if(!selectedFileId) return alert('Pilih file lokal dulu (klik Load pada list).');
+  const it = localIndex.find(x=>x.id===selectedFileId); if(!it) return;
+  downloadText(it.code, `${it.fileName}.${it.fileType}`);
+});
+importToLocalBtn.addEventListener('click', ()=> {
+  // if filePreview contains remote code and selectedFileId is null, import last previewed remote
+  // simple: if remoteCache length and filePreview contains remote code, push first matching remote
+  const previewText = filePreview.textContent;
+  const found = remoteCache.find(r => r.code === previewText);
+  if(!found) return alert('Preview bukan remote item atau tidak ada.');
+  const item = { id: randId(), fileName: found.fileName||('file-'+Date.now()), fileType: found.fileType||'txt', savedAt: new Date().toISOString(), code: found.code, jsonbinId: jsonbinBinEl.value.trim()||JSONBIN_BIN_ID||null, judge0Id: null };
+  localIndex.unshift(item); persistIndex(); toast('Imported preview -> local');
+});
+
+/* Search remote helper triggered by settings button or search */
+async function loadRemoteIndexNow(){
+  const mk = jsonbinKeyEl.value.trim() || JSONBIN_MASTER_KEY || '';
+  const bin = jsonbinBinEl.value.trim() || JSONBIN_BIN_ID || '';
+  if(!mk || !bin) return alert('Isi JSONBIN key + BIN ID di Settings dulu.');
+  remoteStatus.textContent = 'Loading...';
+  try{
+    const j = await jsonbinGet(bin, mk);
+    const arr = j.record && Array.isArray(j.record) ? j.record : [];
+    remoteCache = arr.map(r => ({ code: r.code||'', fileType: r.fileType||'txt', fileName: r.fileName||'untitled', savedAt: r.savedAt||'' }));
+    remoteStatus.textContent = 'Loaded ' + remoteCache.length;
+    renderFiles(searchEl.value);
+  }catch(err){ remoteStatus.textContent = 'Remote error'; alert('Load remote failed: '+err.message); }
+}
+btnLoadRemote.addEventListener('click', loadRemoteIndexNow);
+
+/* Clear local */
+btnClearLocal.addEventListener('click', ()=> { if(confirm('Clear local index?')){ localIndex = []; persistIndex(); alert('Cleared'); } });
+
+/* JSONBIN API helpers */
 async function jsonbinGet(binId, masterKey){
   const url = `https://api.jsonbin.io/v3/b/${binId}`;
   const res = await fetch(url, { headers: { 'X-Master-Key': masterKey } });
-  if(!res.ok) throw new Error('jsonbin get failed '+res.status);
+  if(!res.ok) throw new Error('jsonbin get failed ' + res.status);
   return await res.json();
 }
 async function jsonbinPut(binId, masterKey, record){
   const url = `https://api.jsonbin.io/v3/b/${binId}`;
-  const res = await fetch(url, { method:'PUT', headers: { 'Content-Type':'application/json', 'X-Master-Key': masterKey }, body: JSON.stringify(record) });
-  if(!res.ok) throw new Error('jsonbin put failed '+res.status);
+  const res = await fetch(url, { method:'PUT', headers:{ 'Content-Type':'application/json','X-Master-Key': masterKey }, body: JSON.stringify(record) });
+  if(!res.ok) throw new Error('jsonbin put failed ' + res.status);
   return await res.json();
 }
 async function jsonbinPost(masterKey, record){
   const url = `https://api.jsonbin.io/v3/b`;
-  const res = await fetch(url, { method:'POST', headers: { 'Content-Type':'application/json', 'X-Master-Key': masterKey }, body: JSON.stringify(record) });
-  if(!res.ok) throw new Error('jsonbin post failed '+res.status);
+  const res = await fetch(url, { method:'POST', headers:{ 'Content-Type':'application/json','X-Master-Key': masterKey }, body: JSON.stringify(record) });
+  if(!res.ok) throw new Error('jsonbin post failed ' + res.status);
   return await res.json();
 }
 
-/* Calculator using math.js */
+/* Calculator setup */
 const calcOps = ['+','-','*','/','%','^','sqrt(','sin(','cos(','tan(','log(','ln('];
-calcOps.forEach(op => { const b = document.createElement('button'); b.textContent = op; b.onclick = ()=> { calcInput.value += op; }; opsDiv.appendChild(b); });
-calcEval.addEventListener('click', async () => {
+calcOps.forEach(op => { const b=document.createElement('button'); b.textContent=op; b.className='btn'; b.onclick=()=>{ calcInput.value += op; }; opsDiv.appendChild(b); });
+calcEval.addEventListener('click', async ()=> {
   const expr = calcInput.value.trim(); if(!expr) return;
-  try{
-    if(!window.math) await loadScript('https://cdn.jsdelivr.net/npm/mathjs@11.8.0/lib/browser/math.js');
-    const val = math.evaluate(expr);
-    calcResult.textContent = String(val);
-  }catch(err){ calcResult.textContent = 'Error: ' + err.message; }
+  try{ if(!window.math) await loadScript('https://cdn.jsdelivr.net/npm/mathjs@11.8.0/lib/browser/math.js'); calcResult.textContent = String(math.evaluate(expr)); } catch(err){ calcResult.textContent = 'Error: ' + err.message; }
 });
-calcClear.addEventListener('click', ()=>{ calcInput.value=''; calcResult.textContent='—'; });
+calcClear.addEventListener('click', ()=> { calcInput.value=''; calcResult.textContent='—'; });
 
-/* ChatGPT via OpenAI (direct from browser) */
-chatSend.addEventListener('click', async () => {
-  const mk = openaiKeyEl.value.trim() || OPENAI_API_KEY || '';
+/* ChatGPT (direct) */
+chatSend.addEventListener('click', async ()=> {
+  const mk = openaiKeyInput.value.trim() || OPENAI_API_KEY || '';
   const prompt = chatMsg.value.trim(); if(!prompt) return alert('Tulis prompt dulu');
   if(!mk) return alert('Masukkan OpenAI API key di Settings atau di script constants');
   chatResp.textContent = 'Loading...';
   try{
-    const res = await fetch('https://api.openai.com/v1/chat/completions', {
-      method:'POST', headers: { 'Content-Type':'application/json', 'Authorization':'Bearer '+mk },
-      body: JSON.stringify({ model:'gpt-4o-mini', messages:[{role:'user', content:prompt}], max_tokens:800 })
-    });
+    const res = await fetch('https://api.openai.com/v1/chat/completions', { method:'POST', headers:{ 'Content-Type':'application/json','Authorization':'Bearer '+mk }, body: JSON.stringify({ model:'gpt-4o-mini', messages:[{role:'user', content:prompt}], max_tokens:800 })});
     const j = await res.json();
-    if(j.error) { chatResp.textContent = 'Error: ' + JSON.stringify(j.error); return; }
+    if(j.error){ chatResp.textContent = 'Error: ' + JSON.stringify(j.error); return; }
     const out = (j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) ? j.choices[0].message.content : JSON.stringify(j);
     chatResp.textContent = out;
   }catch(err){ chatResp.textContent = 'Request error: ' + err.message; }
 });
-chatClear.addEventListener('click', ()=>{ chatMsg.value=''; chatResp.textContent='—'; });
+chatClear.addEventListener('click', ()=> { chatMsg.value=''; chatResp.textContent='—'; });
 
-/* Run / Compile logic */
+/* Run / compile logic */
 let pyodide = null, pyReady = false;
-async function ensurePyodide(){
-  if(pyReady) return;
-  await loadScript('https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js');
-  pyodide = await loadPyodide({ indexURL: 'https://cdn.jsdelivr.net/pyodide/v0.23.4/full/' });
-  pyReady = true;
-}
+async function ensurePyodide(){ if(pyReady) return await loadScript('https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js').then(()=>loadPyodide({ indexURL:'https://cdn.jsdelivr.net/pyodide/v0.23.4/full/' })).then(p=>{pyodide=p;pyReady=true;}); }
 
-/* Run button behavior */
-runBtn.addEventListener('click', async () => {
-  const lang = langEl.value;
-  const code = codeEl.value;
-  outputEl.textContent = 'Running...'; htmlPreviewContainer.style.display = 'none';
-
-  // HTML preview mode
-  if(lang === 'html' || previewMode.value === 'html'){
-    htmlPreviewContainer.style.display = 'block';
-    const doc = previewFrame.contentDocument || previewFrame.contentWindow.document;
-    doc.open(); doc.write(code); doc.close();
-    outputEl.textContent = 'HTML rendered (preview).';
-    return;
-  }
-
-  // JavaScript: run inside iframe sandbox
-  if(lang === 'js'){
-    outputEl.textContent = '$Console Vorie';
-    const iframe = document.createElement('iframe'); iframe.style.display='none';
-    document.body.appendChild(iframe);
-    window.addEventListener('message', function onMsg(e){
-      if(e.data && e.data.type === 'v_console'){ outputEl.textContent += '\n' + e.data.msg; }
-    }, { once:false });
-    const wrapped = `
-      <script>
-        (function(){
-          const send=(t)=>parent.postMessage({type:'v_console', msg:t}, '*');
-          console.log = function(){ send(Array.from(arguments).join(' ')); };
-          console.error = function(){ send('ERR: '+Array.from(arguments).join(' ')); };
-          try{ ${code} } catch(e){ send('Exception: '+e); }
-        })();
-      <\/script>
-    `;
-    iframe.srcdoc = wrapped;
-    // remove after timeout to avoid clutter
-    setTimeout(()=>iframe.remove(), 9000);
-    return;
-  }
-
-  // Python (Pyodide)
-  if(lang === 'python'){
-    try{
-      await ensurePyodide();
-      outputEl.textContent = 'Running Python (Pyodide)...';
-      let out = [];
-      pyodide.setStdout({batched:false, stdout: s => out.push(s)});
-      pyodide.setStderr({batched:false, stderr: s => out.push('ERR: '+s)});
-      await pyodide.runPythonAsync(code);
-      outputEl.textContent = out.join('\\n') || '(no output)';
-    }catch(err){ outputEl.textContent = 'Py error: ' + (err.message||err); }
-    return;
-  }
-
-  // Compiled languages: use Wandbox public API as fallback
-  const compilerMap = { c: 'gcc-head', cpp: 'gcc-head', java: 'openjdk-head' };
+runBtn.addEventListener('click', async ()=> {
+  const lang = langEl.value; const code = codeEl.value;
+  outputEl.textContent = 'Running...'; htmlPreview.style.display = 'none';
+  if(lang === 'html' || previewMode.value === 'html'){ htmlPreview.style.display='block'; const doc = previewFrame.contentDocument || previewFrame.contentWindow.document; doc.open(); doc.write(code); doc.close(); outputEl.textContent='HTML rendered'; return; }
+  if(lang === 'js'){ outputEl.textContent='Running JS (sandbox)...'; const iframe = document.createElement('iframe'); iframe.style.display='none'; document.body.appendChild(iframe); window.addEventListener('message', function onMsg(e){ if(e.data && e.data.type==='v_console') outputEl.textContent += '\\n'+e.data.msg; }, { once:false }); const wrapped = `<script>(function(){const send=(t)=>parent.postMessage({type:'v_console', msg:t}, '*');console.log=function(){send(Array.from(arguments).join(' '));};console.error=function(){send('ERR:'+Array.from(arguments).join(' '));};try{${code}}catch(e){send('Exception:'+e);}})();</script>`; iframe.srcdoc = wrapped; setTimeout(()=>iframe.remove(),9000); return; }
+  if(lang === 'python'){ try{ await ensurePyodide(); outputEl.textContent='Running Python...'; let out=[]; pyodide.setStdout({batched:false, stdout:s=>out.push(s)}); pyodide.setStderr({batched:false, stderr:s=>out.push('ERR:'+s)}); await pyodide.runPythonAsync(code); outputEl.textContent = out.join('\\n')||'(no output)'; }catch(err){ outputEl.textContent='Py error: '+(err.message||err); } return; }
+  // compiled languages -> Wandbox fallback
+  const compilerMap = { c:'gcc-head', cpp:'gcc-head', java:'openjdk-head' };
   const comp = compilerMap[lang] || 'gcc-head';
-  const payload = { code, compiler: comp, options: 'warning', runtime: 'true' };
-  try{
-    const res = await fetch('https://wandbox.org/api/compile.json', {
-      method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify(payload)
-    });
-    const j = await res.json();
-    const out = (j.program_output || j.compiler_output || j.status || JSON.stringify(j));
-    outputEl.textContent = out;
-  }catch(err){
-    outputEl.textContent = 'Compile/run error: ' + err.message;
-  }
+  const payload = { code, compiler: comp, options:'warning', runtime:'true' };
+  try{ const res = await fetch('https://wandbox.org/api/compile.json',{ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) }); const j = await res.json(); const out = j.program_output||j.compiler_output||j.status||JSON.stringify(j); outputEl.textContent = out; }catch(err){ outputEl.textContent = 'Compile/run error: ' + err.message; }
 });
 
-/* Stop button (best-effort) */
-stopBtn.addEventListener('click', ()=>{ toast('Stop requested (best-effort).'); /* no reliable cancellation for remote APIs */ });
+/* Helper: map ext */
+function mapExt(ext){ ext = (ext||'').toLowerCase(); if(ext==='c') return 'c'; if(ext==='cpp'||ext==='cc'||ext==='cxx') return 'cpp'; if(ext==='py') return 'python'; if(ext==='js') return 'js'; if(ext==='java') return 'java'; return 'cpp'; }
 
-/* map ext helper */
-function mapExt(ext){
-  ext = (ext||'').toLowerCase();
-  if(ext==='c') return 'c';
-  if(ext==='cpp'||ext==='cc'||ext==='cxx') return 'cpp';
-  if(ext==='py') return 'python';
-  if(ext==='js') return 'js';
-  if(ext==='java') return 'java';
-  return 'cpp';
-}
+/* Load remote index automatically on start if configured */
+setTimeout(()=> { const mk = jsonbinKeyEl.value.trim() || JSONBIN_MASTER_KEY || ''; const bin = jsonbinBinEl.value.trim() || JSONBIN_BIN_ID || ''; if(mk && bin) loadRemoteIndexNow().catch(()=>{}); }, 1200);
 
-/* loadScript util (idempotent) */
-function loadScript(src){ return new Promise((res, rej) => {
-  if(document.querySelector('script[src="'+src+'"]')) return res();
-  const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=rej; document.head.appendChild(s);
-}); }
+/* Init demo item if no local */
+if(!localIndex.length){ localIndex.push({ id:randId(), fileName:'hello', fileType:'cpp', savedAt:new Date().toISOString(), code: codeEl.value, jsonbinId:null, judge0Id:null }); persistIndex(); }
 
-/* initial demo index */
-if(!localIndex.length){
-  localIndex.push({ id:'demo-1', fileName:'hello', fileType:'cpp', savedAt:new Date().toISOString(), code: codeEl.value, jsonbinId:null });
-  persistIndex();
-}
+/* Keyboard shortcuts */
+document.addEventListener('keydown', e => { if((e.ctrlKey||e.metaKey) && e.key==='Enter'){ e.preventDefault(); runBtn.click(); } if((e.ctrlKey||e.metaKey) && e.key==='s'){ e.preventDefault(); saveAsEl.value = saveAsEl.value || ('code-'+Date.now()+'.txt'); saveBtn.click(); } });
 
-/* keyboard shortcuts */
-document.addEventListener('keydown', e => {
-  if((e.ctrlKey || e.metaKey) && e.key === 'Enter'){ e.preventDefault(); runBtn.click(); }
-  if((e.ctrlKey || e.metaKey) && e.key === 's'){ e.preventDefault(); saveAsEl.value = saveAsEl.value || ('code-'+Date.now()+'.txt'); saveBtn.click(); }
-});
+/* loadScript util */
+function loadScript(src){ return new Promise((res,rej)=>{ if(document.querySelector('script[src="'+src+'"]')) return res(); const s=document.createElement('script'); s.src=src; s.onload=res; s.onerror=rej; document.head.appendChild(s); }); }
 
-/* ========== Helper: load jsonbin index if configured ========== */
-async function loadJsonbinBinIfConfigured(){
-  const mk = jsonbinKeyEl.value.trim() || JSONBIN_MASTER_KEY || '';
-  const bin = jsonbinBinEl.value.trim() || JSONBIN_BIN_ID || '';
-  if(!mk || !bin) return;
-  try{
-    const j = await jsonbinGet(bin, mk);
-    const arr = j.record && Array.isArray(j.record) ? j.record : [];
-    arr.reverse().forEach(r => {
-      const id = 'jb-'+(Math.random()*1e8|0);
-      const name = r.fileName || ('file-'+(Math.random()*1e6|0));
-      const ext = r.fileType || 'txt';
-      if(!localIndex.some(x=>x.fileName===name && x.fileType===ext)){
-        localIndex.unshift({ id, fileName: name, fileType: ext, savedAt: r.savedAt||new Date().toISOString(), code: r.code||'', jsonbinId: bin });
-      }
-    });
-    persistIndex(); toast('Loaded index from jsonbin (bin='+bin+')');
-  }catch(err){ console.warn('jsonbin load fail', err); }
-}
-setTimeout(()=>{ loadJsonbinBinIfConfigured().catch(()=>{}); }, 1000);
-
-/* ===== Small UX niceties ===== */
-$('#themeToggle').addEventListener('click', ()=>{
-  if(document.documentElement.style.getPropertyValue('--bg') === '') {
-    // naive toggle - keep minimal: invert background colors
-    document.body.style.filter = document.body.style.filter ? '' : 'invert(.03) hue-rotate(.01turn)';
-  } else {
-    document.body.style.filter = document.body.style.filter ? '' : 'invert(.03) hue-rotate(.01turn)';
-  }
-});
-
-/* quick preview mode change */
-previewMode.addEventListener('change', ()=>{
-  if(previewMode.value === 'html'){ htmlPreviewContainer.style.display = 'block'; } else { htmlPreviewContainer.style.display = 'none'; }
-});
-
-/* ========== Export/Import helpers (small extras) ========== */
-function exportIndex(){
-  const blob = new Blob([JSON.stringify(localIndex,null,2)], { type:'application/json' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'vorie-index.json'; a.click(); a.remove();
-}
-function importIndex(file){
-  const reader = new FileReader(); reader.onload = e => {
-    try{
-      const arr = JSON.parse(e.target.result);
-      if(Array.isArray(arr)){ localIndex = arr.concat(localIndex); persistIndex(); alert('Import sukses'); }
-      else alert('Format tidak valid');
-    }catch(err){ alert('Import gagal: '+err.message); }
-  }; reader.readAsText(file);
-}
-
-/* ========== End main script ========== */
-
-/* ========== PLACEHOLDER API KEYS (letakkan di sini, tidak di UI) ========== */
-/* GANTI sebelum digunakan */
+/* JSONBIN & Judge0 placeholders (constants) */
 const JSONBIN_MASTER_KEY = "$2a$10$uhPFnk0pdepYzFx.QGqgueqBn0ACjHz28cQ7icJGrJT7XPa0ciIge";
 const JSONBIN_BIN_ID = "690fd893ae596e708f4d2d2c";
-const OPENAI_API_KEY = "67ccd2bed1ec8190b14f964abc0542670bb6a6b452d3795b";
+const JUDGE0_HOST = ""; // jika mau default
+const JUDGE0_KEY = ""; // RapidAPI key (optional)
+const OPENAI_API_KEY = "GANTI_KEY_OPENAI_DI_SINI";
 
+/* Small helper logs */
+console.log('VORIE Online IDE — final single-file loaded');
 
-/* ===========================================
-   NOTE: Untuk keamanan produksi, jangan panggil
-   compile/run langsung dari client tanpa backend.
-   =========================================== */
+/* End of script */
 </script>
 </body>
 </html>
