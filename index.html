@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>VORIE Online IDE — v7</title>
+<title>Console Vorie</title>
 
 <!-- CodeMirror 5 (simpler to include) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
@@ -69,8 +69,8 @@ header{height:56px;display:flex;align-items:center;padding:8px 12px;border-botto
   <div class="brand">
     <div id="hamb" class="hamb"><span style="font-weight:700">≡</span></div>
     <div>
-      <div class="header-title">VORIE Online IDE — v7</div>
-      <div class="header-sub">CodeMirror editor • Export ZIP • Terminal • Hidden API</div>
+      <div class="header-title">VORIE Console</div>
+      <div class="header-sub">Made With ❤️ By Xgtib</div>
     </div>
   </div>
   <div style="flex:1"></div>
@@ -88,6 +88,7 @@ header{height:56px;display:flex;align-items:center;padding:8px 12px;border-botto
         <button data-view="files">File Manager</button>
         <button data-view="calc">Calculator</button>
         <button data-view="tools">Tools</button>
+        <button data-view="vor">More By Xgtib</button>
       </div>
     </div>
 
@@ -223,10 +224,10 @@ let jsRunnerIframe = null;
 
 /* Hidden config (edit here to enable remote features) */
 const CONFIG = {
-  JSONBIN_KEY: "",    // paste your jsonbin master key if needed
-  JSONBIN_BIN: "",    // bin id
-  JUDGE0_HOST: "",    // e.g. https://judge0-ce.p.rapidapi.com
-  JUDGE0_KEY: "",     // optional
+  JSONBIN_KEY: "$2a$10$uhPFnk0pdepYzFx.QGqgueqBn0ACjHz28cQ7icJGrJT7XPa0ciIge",    // paste your jsonbin master key if needed
+  JSONBIN_BIN: "690fd893ae596e708f4d2d2c",    // bin id
+  JUDGE0_HOST: "https://console-vorie.p.rapidapi.com/",    // e.g. https://judge0-ce.p.rapidapi.com
+  JUDGE0_KEY: "ca42f31774msh7600ed543ac9995p1b02dajsn068052506cfd",     // optional
 };
 
 /* THEME toggle */
