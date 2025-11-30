@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Vorie Online IDE — Final</title>
+<title>Console Vorie</title>
 <style>
   :root{--bg:#0b1220;--card:#0f1724;--muted:#9fb0c8;--text:#e6eef8;--accent:#60a5fa;--soft:#0b1a2a;--transition:280ms}
   *{box-sizing:border-box}
@@ -42,7 +42,7 @@
   <button id="hamburger" class="hamburger" aria-label="Toggle menu"><span class="bars"></span></button>
   <div>
     <div style="font-weight:600">VORIE Online IDE</div>
-    <div class="small">Multi-language • FileManager auto-save • Judge0 + JsonBin</div>
+    <div class="small">Multi-language • Made With ❤️ By Xgtib</div>
   </div>
   <div style="flex:1"></div>
   <div class="small" style="margin-right:10px">Ctrl/Cmd+Enter → Run</div>
@@ -58,7 +58,7 @@
           <button data-section="files">File Manager</button>
           <button data-section="calc">Calculator</button>
           <button data-section="chat">ChatGPT</button>
-          <button data-section="settings">Settings</button>
+          <button data-section="Vor">More Project</button>
         </div>
       </div>
 
@@ -168,14 +168,15 @@ int main(){ cout<<\"Hello Vorie!\\n\"; return 0; }</textarea>
       </section>
 
       <!-- SETTINGS VIEW -->
-      <section id="view-settings" class="panel" style="display:none">
-        <div class="small" style="margin-bottom:8px">Settings — isi untuk auto-save & remote</div>
+      <section id="view-vor" class="panel" style="display:none">
+        <div class="small" style="margin-bottom:8px">More Project By Xgtib</div>
         <div style="display:grid;grid-template-columns:1fr;gap:8px">
-          <input id="jsonbinKey" placeholder="JSONBIN Master Key (X-Master-Key)" />
-          <input id="jsonbinBinId" placeholder="JSONBIN BIN ID (index bin)" />
-          <input id="judge0Host" placeholder="Judge0 host (eg: https://judge0.example.com)" />
-          <input id="judge0Key" placeholder="Judge0 API key (RapidAPI key / optional)" />
-          <input id="openaiKey" placeholder="OpenAI API key (opsional)" />
+          <h1>Another Project By Xgtib</h1>
+             <p>Mau Buat Website? Ke</p> <a href="tokovorie.xgtib.my.id">Toko Vorie</a>
+              <a href="gxostore.netlify.app">GxoStore</a>
+              <a href="vorcv.xgtib.my.id">VorCv For Vcf</a>
+              <a href="gxotopup.xgtib.my.id">Top Up ML</a>
+              <a href="api.xgtib.my.id">API's Xgtib</a>
           <div class="small">Catatan: Keys disimpan lokal di browser. Jangan pakai key sensitif di perangkat umum.</div>
         </div>
         <div style="display:flex;gap:8px;margin-top:12px">
@@ -189,7 +190,7 @@ int main(){ cout<<\"Hello Vorie!\\n\"; return 0; }</textarea>
 </div>
 
 <footer style="position:fixed;left:0;right:0;bottom:0;padding:8px 12px;background:linear-gradient(180deg,transparent,rgba(0,0,0,0.18));font-size:12px;color:var(--muted)">
-  VORIE Online IDE — Final • Single-file
+  VORIE Online IDE • Made With ♥️ By Xgtib
 </footer>
 
 <script>
@@ -517,8 +518,8 @@ runBtn.addEventListener('click', async ()=> {
   const lang = langEl.value; const code = codeEl.value;
   outputEl.textContent = 'Running...'; htmlPreview.style.display = 'none';
   if(lang === 'html' || previewMode.value === 'html'){ htmlPreview.style.display='block'; const doc = previewFrame.contentDocument || previewFrame.contentWindow.document; doc.open(); doc.write(code); doc.close(); outputEl.textContent='HTML rendered'; return; }
-  if(lang === 'js'){ outputEl.textContent='Running JS (sandbox)...'; const iframe = document.createElement('iframe'); iframe.style.display='none'; document.body.appendChild(iframe); window.addEventListener('message', function onMsg(e){ if(e.data && e.data.type==='v_console') outputEl.textContent += '\\n'+e.data.msg; }, { once:false }); const wrapped = `<script>(function(){const send=(t)=>parent.postMessage({type:'v_console', msg:t}, '*');console.log=function(){send(Array.from(arguments).join(' '));};console.error=function(){send('ERR:'+Array.from(arguments).join(' '));};try{${code}}catch(e){send('Exception:'+e);}})();</script>`; iframe.srcdoc = wrapped; setTimeout(()=>iframe.remove(),9000); return; }
-  if(lang === 'python'){ try{ await ensurePyodide(); outputEl.textContent='Running Python...'; let out=[]; pyodide.setStdout({batched:false, stdout:s=>out.push(s)}); pyodide.setStderr({batched:false, stderr:s=>out.push('ERR:'+s)}); await pyodide.runPythonAsync(code); outputEl.textContent = out.join('\\n')||'(no output)'; }catch(err){ outputEl.textContent='Py error: '+(err.message||err); } return; }
+  if(lang === 'js'){ outputEl.textContent='$Console Vorie'; const iframe = document.createElement('iframe'); iframe.style.display='none'; document.body.appendChild(iframe); window.addEventListener('message', function onMsg(e){ if(e.data && e.data.type==='v_console') outputEl.textContent += '\n'+e.data.msg; }, { once:false }); const wrapped = `<script>(function(){const send=(t)=>parent.postMessage({type:'v_console', msg:t}, '*');console.log=function(){send(Array.from(arguments).join(' '));};console.error=function(){send('ERR:'+Array.from(arguments).join(' '));};try{${code}}catch(e){send('Exception:'+e);}})();</script>`; iframe.srcdoc = wrapped; setTimeout(()=>iframe.remove(),9000); return; }
+  if(lang === 'python'){ try{ await ensurePyodide(); outputEl.textContent='Running Python...'; let out=[]; pyodide.setStdout({batched:false, stdout:s=>out.push(s)}); pyodide.setStderr({batched:false, stderr:s=>out.push('ERR:'+s)}); await pyodide.runPythonAsync(code); outputEl.textContent = out.join('\n')||'(no output)'; }catch(err){ outputEl.textContent='Py error: '+(err.message||err); } return; }
   // compiled languages -> Wandbox fallback
   const compilerMap = { c:'gcc-head', cpp:'gcc-head', java:'openjdk-head' };
   const comp = compilerMap[lang] || 'gcc-head';
@@ -544,12 +545,12 @@ function loadScript(src){ return new Promise((res,rej)=>{ if(document.querySelec
 /* JSONBIN & Judge0 placeholders (constants) */
 const JSONBIN_MASTER_KEY = "$2a$10$uhPFnk0pdepYzFx.QGqgueqBn0ACjHz28cQ7icJGrJT7XPa0ciIge";
 const JSONBIN_BIN_ID = "690fd893ae596e708f4d2d2c";
-const JUDGE0_HOST = ""; // jika mau default
-const JUDGE0_KEY = ""; // RapidAPI key (optional)
+const JUDGE0_HOST = "console-vorie.p.rapidapi.com"; // jika mau default
+const JUDGE0_KEY = "ca42f31774msh7600ed543ac9995p1b02dajsn068052506cfd"; // RapidAPI key (optional)
 const OPENAI_API_KEY = "GANTI_KEY_OPENAI_DI_SINI";
 
 /* Small helper logs */
-console.log('VORIE Online IDE — final single-file loaded');
+console.log('VORIE Online IDE — We Build For Sell');
 
 /* End of script */
 </script>
